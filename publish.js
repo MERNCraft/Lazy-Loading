@@ -1,6 +1,7 @@
 const { resolve, join } = require('path')
 
-const parent = join(__dirname, "..")
+// HARD-CODED to parent of Article/ folder's parent
+const parent = join(__dirname, "../..")
 const path = resolve(parent, "MERNCraft.github.io", ".env")
 require('dotenv').config({ path })
 

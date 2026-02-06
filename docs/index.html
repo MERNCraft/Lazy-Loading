@@ -39,16 +39,182 @@ content="width=device-width, initial-scale=1.0"
   <span class="next-name"></span>
 </nav>
 
+<!-- prerequisites -->
+<section id="prerequisites" aria-labelledby="prerequisites" data-item="Prerequisites">
+<h2>
+<a href="#prerequisites">Prerequisites</a>
+</h2>
+<p>This tutorial assumes that you are already comfortable with the
+basics of React, and that you have already created a number of
+interactive apps with a single focus. In particular, I expect you to
+know about:</p>
+<ul>
+<li>Components</li>
+<li>Promises</li>
+</ul>
+<p>I also assume that you are working with an IDE (Integrated
+Development Environment) like VS Code, which allows you to open HTML
+files using an extension like Live Server. This means that I can
+separate the code you’ll be writing into different files, each with a
+single purpose.</p>
+<details class="tip" open>
+<summary>
+Plan B
+</summary>
+<p>If you don’t have the luxury of a local server, I do provide an
+alternative <em>standalone.html</em> file for each topic that I want to
+illustrate. You can open directly in your browser with a double-click,
+and they do contain the same code as the separate files that I discuss
+in more detail.</p>
+</details>
+</section>
+<!-- Just Lazy -->
+<section id="just-lazy" aria-labelledby="just-lazy" data-item="Just Lazy">
+<h2>
+<a href="#just-lazy">Just Lazy</a>
+</h2>
+<p>Eventually, I’ll show you how to build a demo app using
+<code>npm</code> and <code>Vite</code> to provide a sturdy development
+framework, but you can start with a simple HTML file that you can open
+with a local server, such as <a
+href="https://www.npmjs.com/package/live-server">Live Server</a>.</p>
+<p>Here’s a generic HTML page that will launch any file called
+<code>main.js</code> that it finds in the same folder:</p>
+<pre class="language-html line-numbers"><code class="language-html line-numbers">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Lazy Loading&lt;/title&gt;
+
+  &lt;!-- Load React and ReactDOM from CDN --&gt;
+  &lt;script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"&gt;&lt;/script&gt;
+  &lt;script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"&gt;&lt;/script&gt;
+
+  &lt;!-- Load Babel standalone to convert JSX to JS --&gt;
+  &lt;script src="https://unpkg.com/@babel/standalone@7.21.4/babel.min.js"&gt;&lt;/script&gt;
+
+  &lt;!-- Load the custom script that creates the React components --&gt;
+  &lt;script defer type="text/babel" src="main.js"&gt;&lt;/script&gt;
+
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id="root"&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>And here’s a basic <code>main.js</code> file which is designed to
+load a separate file</p>
+<pre class="language-javascript line-numbers"><code class="language-javascript line-numbers">// Lazy-load the component
+const LazyComponent = React.lazy(() =&gt; {
+  return new Promise((resolve) =&gt; {
+    setTimeout(() =&gt; {
+      resolve({
+        default: function() {
+          return &lt;div&gt;This component was lazy-loaded!&lt;/div&gt;;
+        }
+      });
+    }, 2000); // Simulate a 2-second loading delay
+  });
+});
+
+// Main app component
+const App = () =&gt; {
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;React.lazy() Demo&lt;/h1&gt;
+      &lt;React.Suspense fallback={&lt;div&gt;2 seconds please...&lt;/div&gt;}&gt;
+        &lt;LazyComponent /&gt;
+      &lt;/React.Suspense&gt;
+    &lt;/div&gt;
+  );
+};
+
+// Render the app to the DOM
+ReactDOM.render(&lt;App /&gt;, document.getElementById('root'));
+</code></pre>
+<pre class="line-numbers"><code class="line-numbers">    '</code></pre>
+<details class="solution">
+<summary>
+Standalone version (if you don’t have a local server)
+</summary>
+<pre class="language-html line-numbers"><code class="language-html line-numbers">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;React.lazy() Demo&lt;/title&gt;
+
+  &lt;!-- Load React and ReactDOM from CDN --&gt;
+  &lt;script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"&gt;&lt;/script&gt;
+  &lt;script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"&gt;&lt;/script&gt;
+
+  &lt;!-- Load Babel standalone to handle JSX --&gt;
+  &lt;script src="https://unpkg.com/@babel/standalone@7.21.4/babel.min.js"&gt;&lt;/script&gt;
+
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id="root"&gt;&lt;/div&gt;
+
+  &lt;!-- Script to run JSX, make sure it has type="text/babel" --&gt;
+  &lt;script type="text/babel"&gt;
+    // Lazy-load the component
+    const LazyComponent = React.lazy(() =&gt; {
+      return new Promise((resolve) =&gt; {
+        setTimeout(() =&gt; {
+          resolve({
+            default: function() {
+              return &lt;div&gt;This component was lazy-loaded!&lt;/div&gt;;
+            }
+          });
+        }, 2000); // Simulate a 2-second loading delay
+      });
+    });
+
+    // Main app component
+    const App = () =&gt; {
+      return (
+        &lt;div&gt;
+          &lt;h1&gt;React.lazy() Demo&lt;/h1&gt;
+          &lt;React.Suspense fallback={&lt;div&gt;Loading...&lt;/div&gt;}&gt;
+            &lt;LazyComponent /&gt;
+          &lt;/React.Suspense&gt;
+        &lt;/div&gt;
+      );
+    };
+
+    // Render the app to the DOM
+    ReactDOM.render(&lt;App /&gt;, document.getElementById('root'));
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+</details>
+</section>
 <section id="intro" aria-labelledby="intro" data-item="Introduction">
 <h2>
 <a href="#intro">Introduction</a>
 </h2>
-<p>To create your own content, edit the file at
-<code>docs/md/99-Intro.md</code> and add more <code>.md</code> files in
-the <code>docs/md/</code> folder.</p>
-<p>See <a
-href="https://htm-elves.github.io/Writing-Your-Own-Tutorials/">Writing
-Your Own Tutorials</a> for tips and shortcuts.</p>
+<p>Alice teaches French as a foreign language. She has a smartboard in
+her classroom, and there are enough tablets for all her students. She
+wants to create a number of interesting activities, where her students
+for her students, and she has a vivid imagination. Ideally, she wants
+web app with a single simple URL, to which she (or rather we) can add
+new activities each time she finalizes her plans for a new one.</p>
+<p>To begin with, the app will have a single activity, and it won’t take
+long to load. But over time, the amount of code and assets required for
+all the activities that she plans will become too much to load all at
+once. Why load the code and assets for an activity that is not needed
+now? Why not wait and load files only when they are needed?</p>
+<p>What we need to create is basicly a <em>generic engine</em> whose
+possibilities can evolve organically, without us having to rewrite the
+core code each time a new activity is added.</p>
+<p><strong>Lazy loading</strong> seems to be the solution. So that’s
+what this tutorial is about.</p>
+<p>I plan to show, step-by-step, how lazy loading works in a React
+frontend, and how to build an app where you can simply create a new
+directory on your server that contains all the code and assets that you
+need for a new activity, and the app will be able to load the activity
+on the fly, and maintain its state if you navigate to a different
+activity and back.</p>
 </section>
 
 <div class="spacer"></div>
