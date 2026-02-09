@@ -1,17 +1,14 @@
 {
   "scripts": {
-    "<<<CUSTOMIZED": "HARD-CODED PATHS FOR public/ and Article/",
-
-    "pandoc": "pandoc -o docs/index.html --filter ../../MERNCraft.github.io/public/filter.js --template=../../MERNCraft.github.io/public/template.html docs/md/*.md",
-    "watch": "node ../../MERNCraft.github.io/public/watch.js Lazy-Loading/Article",
-    
-    "CUSTOMIZED>>>": "",
+    "pandoc": "pandoc -o docs/index.html --filter public/filter.js --template=public/template.html docs/md/*.md",
+    "watch": "node public/watch.js Code-Splitting/Article",
     "publish": "node publish.js"
   },
   "devDependencies": {
     "dotenv": "^16.4.7"
   },
   "dependencies": {
+    "esbuild": "^0.27.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   }
