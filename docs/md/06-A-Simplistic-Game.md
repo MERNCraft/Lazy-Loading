@@ -8,7 +8,8 @@
 
 The <button data-name="anchor-import-placeholder">proof of concept code in the last section</button> does not create anything interactive. You can change the content of `placeholder.js` to what is shown below, or open the `04_import_number_game/` subfolder in your `Sandbox/` folder, where you will find the same code.
 
-### Edited placeholder.js
+<h3 name="anchor-number-game">Edited placeholder.js</h3>
+
 ```javascript
 export default function renderGame(root) {
   root.innerHTML = ""

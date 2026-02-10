@@ -148,5 +148,7 @@ The points to note here are:
 * The imported module is evaluated once and for all
 * The imported data is an object with a `default` property that allows you to access the module.
 
+Now that you understand how `import()` can load a module dynamically, let's see how to make the imported module interactive. In the next section, you'll work with a tiny game that you can actually play.
+
 </details>
 </section>

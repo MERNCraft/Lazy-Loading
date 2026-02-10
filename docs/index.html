@@ -722,6 +722,10 @@ before the imported module can be used</li>
 <li>The imported data is an object with a <code>default</code> property
 that allows you to access the module.</li>
 </ul>
+<p>Now that you understand how <code>import()</code> can load a module
+dynamically, let’s see how to make the imported module interactive. In
+the next section, you’ll work with a tiny game that you can actually
+play.</p>
 </details>
 </section>
 <!-- A Simplistic Game -->
@@ -735,7 +739,9 @@ You can change the content of <code>placeholder.js</code> to what is
 shown below, or open the <code>04_import_number_game/</code> subfolder
 in your <code>Sandbox/</code> folder, where you will find the same
 code.</p>
-<h3 id="edited-placeholder.js">Edited placeholder.js</h3>
+<h3 name="anchor-number-game">
+Edited placeholder.js
+</h3>
 <pre class="language-javascript line-numbers"><code class="language-javascript line-numbers">export default function renderGame(root) {
   root.innerHTML = ""
 
@@ -874,6 +880,536 @@ possible by the native JavaScript keyword, <code>import</code>.</p>
 <p>In the next section, you’ll see JavaScript versions of the three
 mini-language game modules that make up the final React project, which
 you already saw as a preview at the beginning.</p>
+</details>
+</section>
+<!-- Three Language Games -->
+<section id="three-language-games" aria-labelledby="three-language-games" data-item="Three Language Games">
+<h2>
+<a href="#three-language-games">Three Language Games</a>
+</h2>
+<p>In the folder <code>Sandbox/05_three_games/</code> you can find the
+<code>index.html</code> file and open it with your local server. You
+should see a page with three buttons, with the names of the games, and a
+grey array, where the games will appear.</p>
+<figure>
+<img src="images/05-three-games.webp"
+alt="The Three Games web app, with none of the games loaded" />
+<figcaption aria-hidden="true">The Three Games web app, with none of the
+games loaded</figcaption>
+</figure>
+<p>You can click on each button in turn, to see the game that the app
+imports and displays:</p>
+<figure>
+<img src="images/05-odd-one-out.webp"
+alt="Which word is the odd one out?" />
+<figcaption aria-hidden="true">Which word is the odd one
+out?</figcaption>
+</figure>
+<figure>
+<img src="images/05-choose-picture.webp"
+alt="Which picture matches the word?" />
+<figcaption aria-hidden="true">Which picture matches the
+word?</figcaption>
+</figure>
+<figure>
+<img src="images/05-choose-word.webp"
+alt="Which word matches the picture?" />
+<figcaption aria-hidden="true">Which word matches the
+picture?</figcaption>
+</figure>
+<h2 id="the-container-app">The container app</h2>
+<h3 id="index.html-2">index.html</h3>
+<p>The <code>index.html</code> file is deliberately boring: three
+buttons, one mount point, no framework.</p>
+<p>If it helps, you can think of this as the non-React equivalent of a
+root component with three event triggers and one render target.</p>
+<details class="tldr">
+<summary>
+So bore me with it
+</summary>
+<p>The <code>index.html</code> file loads a basic stylesheet (which I
+won’t treat here) and a plain JavaScript file (which I describe
+below).</p>
+<p>It creates three buttons and a <code>&lt;div&gt;</code> with the
+<code>id</code> <code>game-space</code> (the grey area), and wraps these
+in a <code>&lt;main&gt;</code> tag. Nothing complex.</p>
+<pre class="language-html line-numbers"><code class="language-html line-numbers">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;Three Games&lt;/title&gt;
+  &lt;link rel="stylesheet" href="styles.css"&gt;
+  <b>&lt;script defer src="script.js"&gt;&lt;/script&gt;</b>
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;main&gt;
+    &lt;div id="buttons"&gt;
+      &lt;<b>button</b> type="button" id="difference-game"&gt;
+        Odd One Out
+      &lt;/button&gt;
+      &lt;<b>button</b> type="button" id="picture-game"&gt;
+          Picture Game
+      &lt;/button&gt;
+      &lt;<b>button</b> type="button" id="word-game"&gt;
+        Word Game
+      &lt;/button&gt;
+    &lt;/div&gt;
+    <b>&lt;div id="game-space"&gt;&lt;/div&gt;</b>
+  &lt;/main&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+</details>
+<h3 id="script.js">script.js</h3>
+<p>The <code>script.js</code> file is almost identical to the
+<button data-name="anchor-import-placeholder">ones you’ve already
+seen</button>. The only major differences are that this time:</p>
+<ol type="1">
+<li>There are three buttons which are given the same event listener</li>
+<li>The <code>url</code> of the module that is loaded is obtained using
+the <code>id</code> of the button that was clicked.</li>
+</ol>
+<pre class="language-javascript line-numbers"><code class="language-javascript line-numbers">const buttons = document.<b>getElementsByTagName</b>("button")
+const gameSpace = document.getElementById("game-space")
+
+<b>Array.from(buttons).forEach( button =&gt; {</b>
+  button.addEventListener("click", importGame)
+<b>})</b>
+
+function importGame(<b>event</b>) {
+  <b>const gameName = event.target.id
+  const url = `./games/${gameName}.js`</b>
+  const promise = import(url)
+  promise
+    .then(result =&gt; result.default)
+    .then(renderGame =&gt; renderGame(gameSpace))
+    .catch(error =&gt; console.error(error))
+}</code></pre>
+<p>As you will see later, this is the same pattern that
+<code>React.lazy()</code> uses internally: a user action triggers a
+dynamic import, which resolves to a render function.</p>
+<h2 id="the-three-games">The three games</h2>
+<p>The first game (Odd One Out) is clearly different from the other two.
+It has no images and it uses a different set of words.</p>
+<p>The other two games (Picture Game and Word Game) have a lot in
+common. Although each has its own specific game logic, they share:</p>
+<ul>
+<li>the same word list</li>
+<li>the same images</li>
+<li>the same basic styling and layout</li>
+<li>the method for checking if the player got the right answer.</li>
+</ul>
+<p>It would make sense for them to import these shared features from the
+same modules. These modules would be loaded and evaluated once, when the
+first of the two games is imported, and then be already available when
+the second game is opened.</p>
+<h2 id="making-work-for-you">Making work for you</h2>
+<p>But this is a tutorial, so I have deliberately coded them
+differently, to give you some work to do.</p>
+<p>You can imagine that each of these files was written by a different
+member of your Dev Team, after an initial discussion about the use of
+modules. Each member of the team has understood the concept slightly
+differently.</p>
+<p>If you can apply the same elegant modular to each of these
+mini-games, then you will have shown how much you have understood so
+far.</p>
+<p>But first you need to know what you have to work on.</p>
+<h2 id="picture-game.js-a-standalone-approach">picture-game.js: a
+standalone approach</h2>
+<p>I won’t show all the code in
+<code>Sandbox/05-three-games/games/picture-game.js</code> here, because
+you can have the file itself that you can look at. You don’t need to
+understand the whole file. Just notice how many different
+responsibilities it has.</p>
+<p>Here’s what to look out for:</p>
+<ul>
+<li>Everything lives in one file</li>
+<li>Styles, data, logic are bundled</li>
+<li>The module exports a single render function</li>
+</ul>
+<details class="tldr">
+<summary>
+A closer look
+</summary>
+<p>You’ll find that the file at
+<code>Sandbox/05-three-games/games/picture-game.js</code> is organized
+in a similar way to the <button data-name="anchor-number-game">Number
+Game</button> from the last section:</p>
+<ol type="1">
+<li><p>Everything is included in one file.</p></li>
+<li><p>The data used by the game is defined inside the file itself:</p>
+<pre class="language-javascript line-numbers" data-start="6"><code class="language-javascript line-numbers">const words = [
+  "ball",
+  "bear",
+  "bell",
+  "boar",
+  "fair",
+  "fall",
+  "fell",
+  "four"
+]</code></pre></li>
+<li><p>There are helper functions to control the logic of the game, such
+as:</p>
+<pre class="language-javascript line-numbers" data-start="92"><code class="language-javascript line-numbers">const checkClick = ( target, word, button, div ) =&gt; {</code></pre>
+<pre class="language-javascript wrap"><code class="language-javascript wrap">// 9 lines skipped</code></pre>
+<pre class="language-javascript line-numbers" data-start="102"><code class="language-javascript line-numbers">}</code></pre></li>
+<li><p>The UI is generated using the function that is exported as
+<code>default</code>:</p>
+<pre class="language-javascript line-numbers" data-start="106"><code class="language-javascript line-numbers">export default function renderGame(root) {</code></pre>
+<pre class="language-javascript wrap"><code class="language-javascript wrap">// 40 lines skipped</code></pre>
+<pre class="language-javascript line-numbers" data-start="147"><code class="language-javascript line-numbers">}</code></pre></li>
+<li><p>Styling is treated inline (using a somewhat more sophisticated
+method than in the <button data-name="anchor-number-game">Number
+Game</button>):</p>
+<pre class="language-javascript line-numbers" data-start="33"><code class="language-javascript line-numbers">const <b>h2Styles</b> = {
+  margin: 0,
+  "text-align": "center",
+}</code></pre>
+<pre class="language-javascript line-numbers" data-start="60"><code class="language-javascript line-numbers">const <b>applyStyles</b> = (element, styles) =&gt; {
+  Object.assign(element.style, styles)
+}</code></pre>
+<pre class="language-javascript line-numbers" data-start="135"><code class="language-javascript line-numbers">const h2 = document.createElement("h2")
+h2.textContent = word
+<b>applyStyles(h2, h2Styles)</b></code></pre></li>
+</ol>
+</details>
+<h3 id="cleaning-up-before-moving-in">Cleaning up before moving in</h3>
+<p>If you look at both <code>difference.js</code> and
+<code>picture-game.js</code>, you will see that, despite their
+differences, they both clear out any DOM elements before they start
+adding their own. Each of them contains its own <code>clear()</code>
+function, which it calls before it does anything else:</p>
+<pre class="language-javascript wrap"><code class="language-javascript wrap">const clear = element =&gt; {
+  while (element.firstChild) {
+    element.firstChild.remove()
+  }
+}</code></pre>
+<pre class="language-javascript wrap"><code class="language-javascript wrap">
+  const newGame = () =&gt; {
+    // Empty the parent element
+    clear(root)</code></pre>
+<pre class="language-javascript wrap"><code class="language-javascript wrap">    // core of newGame() function skipped</code></pre>
+<pre class="language-javascript wrap"><code class="language-javascript wrap">  }</code></pre>
+<p>This is not best practice. Best practice is DRY: Don’t Repeat
+Yourself. In short, <code>picture-game.js</code>, like
+<code>difference.js</code>, are independent and self-contained. But they
+don’t need to be. There’s a better way.</p>
+<details class="pivot" open>
+<summary>
+Summary
+</summary>
+<p>In this section, you’ve been able to play with three simple games
+which can be loaded on demand, using <code>import()</code>. In the
+current set-up, the games are mutually exclusive; you can only play one
+of them at a time. Each one clears out any DOM components that another
+has created before installing its own.</p>
+<p>The most troubling is that each is independent of the others: they
+share nothing between them.</p>
+<p>When working in React, you have been used to creating components that
+are stored in a single script but which can be used in multiple places.
+As you will see in the next section, this is also possible in plain
+JavaScript. In fact, plain JavaScript could do it first.</p>
+<p>In the next section, you’ll see how the elements that can be shared
+between the games can be broken out into separate modules that all can
+use.</p>
+</details>
+</section>
+<!-- Using submodules -->
+<section id="using-submodules" aria-labelledby="using-submodules" data-item="Using submodules">
+<h2>
+<a href="#using-submodules">Using submodules</a>
+</h2>
+<p>It’s time to look at the <code>word-game.js</code> script, and its
+modular approach.</p>
+<p>The <code>word-game.js</code> script is much more compact than the
+other two. Much of the code it needs has been externalized in other
+modules. The <code>word-game.js</code> module uses static
+<code>import ... from ...</code> statements to load the submodules it
+needs synchronously as part of module evaluation, before continuing
+executing its own code.</p>
+<pre class="language-javascript line-numbers" data-start="6"><code class="language-javascript line-numbers"><b>import</b> wordGame <b>from</b> './submodules/word.js'
+<b>import</b> words <b>from</b> '../../words.json' with { type: 'json' }
+<b>import</b> {
+  clear,
+  getChoices,
+  checkClick
+} <b>from</b> './submodules/helpers.js'</code></pre>
+<details class="note" open>
+<summary>
+import … with { type: “json” }
+</summary>
+<p>Notice how the JSON file is imported:</p>
+<pre class="language-javascript line-numbers" data-start="7"><code class="language-javascript line-numbers">import words from '../../words.json' <b>with { type: 'json' }</b></code></pre>
+<p>The <a
+href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import/with">import
+attribute</a> <code>{ type: "json" }</code> that is applied using the
+keyword <code>with</code> ensures that the browser parses the incoming
+file correctly.</p>
+<p>The Internet is often an unsafe place for packets of data, and a file
+with the extension <code>.json</code> might actually contain malicious
+JavaScript. The browser does not simply parse it as an <em>object</em>:
+it parses the incoming data specifically as a <em>JSON object</em>, and
+throws an error if this is not the case. Potentially malicious code is
+neutralized.</p>
+<p>See the <a
+href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import/with">MDN
+article on the subject</a> for more details.</p>
+</details>
+<p>The <code>word-game.js</code> file also contains a function to append
+a stylesheet to the HTML created by the <code>index.html</code> file,
+rather than using inline styles:</p>
+<pre class="language-javascript line-numbers" data-start="15"><code class="language-javascript line-numbers">const applyStyles = () =&gt; {
+  const link = document.createElement('link')
+  link.rel = 'stylesheet'
+  link.href = './games/submodules/styles.css'
+  document.head.appendChild(link)
+}</code></pre>
+<p>Finally, it exports a function which itself activates a module which
+it imported at the beginning:</p>
+<pre class="language-javascript line-numbers" data-start="26"><code class="language-javascript line-numbers">// This function is the module's public API
+export default function renderGame(root) {
+  applyStyles()
+  return wordGame({ root, words, clear, getChoices, checkClick })
+}</code></pre>
+<p>If you are looking for buzzwords to describe this kind of design
+pattern, you might like to read more about:</p>
+<ul>
+<li><a
+href="https://en.wikipedia.org/wiki/Inversion_of_control">inversion of
+control</a></li>
+<li><a
+href="https://en.wikipedia.org/wiki/Dependency_injection">dependency
+injection</a></li>
+</ul>
+<p>Can you see how, from a React perspective, this parallels the way
+hooks are passed into components?</p>
+<h2 id="the-submodules-folder">The submodules/ folder</h2>
+<p>The real work of <code>word-game.js</code> has been delegated to the
+imported files. The <code>words.json</code> file is stored at the root
+of the <code>Sandbox/</code> folder, because you will be using it later.
+The other imported files are stored in <code>submodules/</code>
+folder.</p>
+<h3 id="submoduleshelpers.js">submodules/helpers.js</h3>
+<p>If you compare <code>helper.js</code> with
+<code>picture-game.js</code>, you will see that they both include a
+number of identical functions.</p>
+<p>You don’t need to understand every line here — just notice that none
+of these functions know which game they’re being used in.</p>
+<pre class="language-javascript line-numbers" data-start="6"><code class="language-javascript line-numbers">export const clear = element =&gt; {
+  while (element.firstChild) {
+    element.firstChild.remove()
+  }
+}
+
+
+export const getChoices = (words) =&gt; {
+  // Choose a random word that did not appear in the last 3 times
+  let random = Math.floor(Math.random() * (words.length - 3))
+  const word = words.splice(random, 1)[0]
+  words.push(word) // move to end of words
+
+  const decoys = [...words]
+  // Remove the last word, which cannot be a decoy
+  decoys.pop()
+
+  // Choose 3 decoys at random
+  const choices = Array.from({ length: 3 })
+  choices.forEach(( _, index, array ) =&gt; {
+    const random = Math.floor(Math.random() * decoys.length)
+    const decoy = decoys.splice(random, 1)[0]
+    array[index] = decoy
+  })
+
+  // Place the correct word in a random position
+  random = Math.floor(Math.random() * 4)
+  choices.splice(random, 0, word)
+
+  return { word, choices }
+}
+
+
+export const checkClick = (target, correct, button) =&gt; {
+  if (correct) {
+    target.classList.add("right")
+    button.disabled = false
+
+  } else {
+    target.classList.add("wrong")
+  }
+}</code></pre>
+<p>The Word Game needs these functions just as much as the Picture Game
+does, so it makes sense to create a separate module that both games can
+share. One download: multiple uses.</p>
+<p>And as a bonus: you can test these functions in isolation, to make
+sure that they do exactly what you expect, before making other modules
+depend on them.</p>
+<details class="note" open>
+<summary>
+Named exports, but no default export
+</summary>
+<p>Notice that the functions in <code>helpers.js</code> are all declared
+in a similar way, with an obligatory name:</p>
+<pre class="language-javascript wrap"><code class="language-javascript wrap">export const functionNameRequired = (parameters) =&gt; { ... }</code></pre>
+<p>None of the functions are exported as <code>default</code>, like you
+have seen before:</p>
+<pre class="language-javascript wrap"><code class="language-javascript wrap">export default function optionalFunctioName(parameters) { ... }</code></pre>
+<strong>Question: Without a default export, what will the imported
+object look like?</strong>
+<details class="answer">
+<summary>
+Answer
+</summary>
+<p>As you might expect: the imported module is an object with no
+<code>default</code> key:</p>
+<pre>{
+  checkClick: checkClick(target, correct, button),
+  clear:      clear(element),
+  getChoices: getChoices(words),
+  Symbol(Symbol.toStringTag): "Module"
+}
+</pre>
+</details>
+</details>
+<h3 id="submodulesword.js">submodules/word.js</h3>
+<p>The <code>submodules/word.js</code> script receives the
+<code>clear()</code>, <code>getChoices()</code> and
+<code>checkClick()</code> functions in the call it receives from
+<code>word-games.js</code>, along with the <code>words</code> array, and
+the <code>root</code> DOM element that has been forwarded from the
+<code>script.js</code> module.</p>
+<p>All the rest of the code in the <code>submodules/word.js</code>
+script is specific to this one game. The <code>newGame()</code> function
+simply creates the DOM elements needed for one iteration of this
+particular game.</p>
+<p>Note that there are no inline styles. Styling is taken care of by the
+stylesheet that was appended to the HTML <code>&lt;head&gt;</code>.</p>
+<pre class="language-javascript line-numbers" data-start="6"><code class="language-javascript line-numbers">export default function gameCore({
+  root,
+  words,
+  clear,
+  getChoices,
+  checkClick
+}) {
+  const newGame = () =&gt; {
+    // Empty the parent element
+    clear(root)
+
+    // Choose a target word and three decoys
+    const { word, choices } = getChoices(words)
+
+    // Recreate the game UI with a custom div inside root
+    const space = document.createElement("div")
+    space.className = "word-game"
+    root.append(space)
+
+    const title = document.createElement("h2")
+    title.textContent = "Choose the Word"
+    space.append(title)
+
+    const image = document.createElement("img")
+    image.src = `../images/${word}.webp`
+    image.alt = word
+    space.append(image)
+
+    const p = document.createElement("p")
+    choices.forEach( text =&gt; {
+      const span = document.createElement("span")
+      span.textContent = text
+      span.addEventListener(
+        "click",
+        ({target}) =&gt; checkClick( target, text === word, button ))
+      p.append(span)
+    })
+    space.append(p)
+
+    const button = document.createElement("button")
+    button.type = "button"
+    button.textContent = "Next Image"
+    button.addEventListener("click", newGame)
+    button.disabled = true
+    space.append(button)
+  }
+
+  // Force game() to run as soon as gameCore() is called
+  newGame()
+}</code></pre>
+<h2 id="really">Really?</h2>
+<p>I just wrote: “All the rest of the code in the
+<code>submodules/word.js</code> script is specific to this one game”.
+It’s time for you to prove me wrong, in the following challenge.</p>
+<details class="challenge" open>
+<summary>
+Challenge: Refactoring the Games
+</summary>
+<p>How much of the code in <code>word-game.js</code> and its submodules
+can be shared with the Picture Game?</p>
+<p>Your challenge (if you accept it) is to refactor the files in the
+’05-three-games/` folder, so that the least amount of bandwidth is used
+when a visitor plays all three games.</p>
+<p>Consider that you are “coding by differences”. Any time you find
+something that is duplicated in two or more scripts, move that thing out
+into a module, and import it into the scripts that need to use it.</p>
+<p>Do your best to come up with a neat, elegant solution, before you
+look at my scoring system and my suggested answer.</p>
+<details class="solution">
+<summary>
+Scoring
+</summary>
+<p>You can earn a total of 30 points.</p>
+<ul>
+<li>1 point for moving <code>applyStyles()</code> from
+<code>word-game.js</code> into <code>helpers.js</code></li>
+<li>1 point for making it possible to customize the url for the
+stylesheet in the <code>applyStyles()</code> call</li>
+<li>2 point for noticing that the creation of the button that triggers
+<code>newGame()</code> is common to all three games, and can be moved to
+<code>helpers.js</code></li>
+<li>1 point for making it possible to customize the name of this
+button</li>
+<li>3 points for noticing that the <code>differences-game.js</code>
+module can use the same <code>clear()</code>, <code>checkClick()</code>
+and <code>newButton()</code> functions as the other two games, so you
+can import these from <code>helpers.js</code></li>
+<li>4 points for expanding <code>styles.css</code> so that it can be
+used for all three games</li>
+<li>4 points for noticing that now the only difference between any of
+the games is the module that generates the UI for the game, and that
+this means you can reduce the files <code>differences-game.js</code>,
+<code>picture-game.js</code> and <code>word-game.js</code> to thin entry
+points</li>
+<li>10 points for creating a generic game module for your thin entry
+points to use. You can only get this points if your generic module
+gathers up the data and functions required by all the games, and calls
+the appropriate game UI function with all the necessary information</li>
+<li>4 points for arranging all the files in a folder hierarchy, and for
+giving all your files and folders meaningful names.</li>
+</ul>
+<p>You’ll find my solution (for which I award myself 30 points) in
+<code>06-three-modularized-games/</code>. And you can award yourself a
+bonus of 20 points if your own solution is better than mine.</p>
+</details>
+</details>
+<details class="pivot" open>
+<summary>
+Summary
+</summary>
+<p>In this section, you’ve seen a different way to structure a game
+module: instead of doing everything in one file,
+<code>word-game.js</code> acts as a thin entry point that pulls together
+data, shared helpers, styles, and a game-specific UI module.</p>
+<p>Static imports determine what gets bundled together. Anything that
+<code>word-game.js</code> imports synchronously becomes part of the same
+download, and anything that lives outside that boundary can be shared
+with other games at no extra cost.</p>
+<p>By pushing common logic into submodules, you reduce duplication, make
+the code easier to test, and ensure that shared functionality is loaded
+once and reused. The result is a design that scales: adding new games
+means writing only what’s different, while everything else stays the
+same.</p>
+<p>You’ve also had the chance to practice refactoring code you didn’t
+write, with the explicit goal of optimizing it for code splitting.</p>
+<p>In the next section, you’ll see the same ideas expressed in JSX, and
+explore why React needs to provide <code>lazy()</code> and
+<code>Suspense</code> when components are loaded dynamically with
+<code>import()</code>.</p>
 </details>
 </section>
 <section id="intro" aria-labelledby="intro" data-item="Introduction">
